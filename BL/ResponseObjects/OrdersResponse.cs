@@ -26,7 +26,8 @@ namespace BL.ResponseObjects
         public DateTime? ShopRejectedAt { get; set; }
         public string RejectedMsg { get; set; }
         
-        public DateTime? OrderdeliveredAt { get; set; }
+        public DateTime? OrderdeliveredAt { get; set; } 
+
        
     }
 }
