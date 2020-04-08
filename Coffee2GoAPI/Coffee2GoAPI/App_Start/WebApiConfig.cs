@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace Coffee2GoAPI
 {
@@ -16,6 +17,9 @@ namespace Coffee2GoAPI
 
             // Web API routes
             config.MapHttpAttributeRoutes();
+            EnableCorsAttribute cors = new EnableCorsAttribute("*", "*", "GET,POST");
+
+            config.EnableCors(cors);
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
