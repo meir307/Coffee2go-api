@@ -171,13 +171,13 @@ namespace BL
             if (oqp.UserId != null)
             {
                 name = "BuisnessName, null fullname, null MobilePhoneNo, null Email";
-                fromClause = " from coffee2go2.orders,coffee2go2.Shops ";
+                fromClause = " from orders,Shops ";
                 whereClause = " where  Userid = " + oqp.UserId + " and orders.shopid=shops.id";
             }
             else
             {
                 name = "fullname, null BuisnessName, MobilePhoneNo, Email";
-                fromClause = "from coffee2go2.orders,coffee2go2.users ";
+                fromClause = "from orders,users ";
                 whereClause = "where shopid = " + oqp.ShopId + " and orders.userid=users.id";
             }
 
