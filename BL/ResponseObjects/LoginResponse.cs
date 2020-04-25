@@ -12,14 +12,16 @@ namespace BL.ResponseObjects
         
         GlobalData GD;
 
-        public string SessionId;
+        //public string SessionId;
+        public User User;
         public List<Shop> Shops = null;
         public List<OrdersResponse> OpenOrders = null;
                
         public LoginResponse(GlobalData gd, User user)
         {
             GD = gd;
-            SessionId = user.SessionId;
+            //SessionId = user.SessionId;
+            this.User = user;
         }
 
         public void getOrders(User user)

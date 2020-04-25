@@ -23,6 +23,7 @@ namespace BL
         public DateTime? LastLoginAt { get; set; }
         public string SessionId { get; set; }
         public DateTime? SessionTime { get; set; }
+        public string Logo { get; set; }
 
         public bool NowOpen { get; set; }
         CRUD dal;
@@ -129,7 +130,7 @@ namespace BL
 
             StringBuilder sSql = new StringBuilder();
 
-            sSql.Append("select Id,BuisnessName,lat,lng,MenuObj, NowOpen, (6371 * acos(cos(radians(" + lat + ")) * cos(radians(lat)) * cos(radians(lng)");
+            sSql.Append("select Id,BuisnessName, PhoneNo, lat,lng,MenuObj, NowOpen,Logo, (6371 * acos(cos(radians(" + lat + ")) * cos(radians(lat)) * cos(radians(lng)");
             sSql.Append("- radians(" + lng + ")) + sin(radians(" + lat + ")) * sin(radians(lat))))");
             sSql.Append("AS distance FROM shops where Active=1 and NowOpen=1 HAVING distance < " + distance);
 
@@ -159,6 +160,8 @@ namespace BL
             shop.Lng = float.Parse(dr["lng"].ToString());
             shop.MenuObj = dr["MenuObj"].ToString();
             shop.NowOpen = dr["NowOpen"].ToString() == "1";
+            shop.PhoneNo = dr["PhoneNo"].ToString();
+            shop.Logo = dr["Logo"].ToString();
 
             return shop;
         }
@@ -257,7 +260,7 @@ namespace BL
 
 
             StringBuilder sSql = new StringBuilder();
-            sSql.Append("insert into shops (Email,Password,PhoneNo,Lat, Lng,RegistrationDate,BuisnessName, MenuObj ) values (");
+            sSql.Append("insert into shops (Email,Password,PhoneNo,Lat, Lng,RegistrationDate,BuisnessName,Logo, MenuObj ) values (");
 
             //sSql.Append(("UNHEX(REPLACE(\"" + id.ToString() + "\", \"-\",\"\"))"));
                 
@@ -268,6 +271,7 @@ namespace BL
             sSql.Append("'" + this.Lng + "',");
             sSql.Append("'" + RegistrationDate + "',");
             sSql.Append("'" + this.BuisnessName + "',");
+            sSql.Append("'" + this.Logo + "',");
             sSql.Append("'" + this.MenuObj + "')");
 
             return sSql.ToString();
