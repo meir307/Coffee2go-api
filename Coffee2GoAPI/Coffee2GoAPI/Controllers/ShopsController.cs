@@ -2,9 +2,11 @@
 using BL.ResponseObjects;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 
 namespace Coffee2GoAPI.Controllers
@@ -47,7 +49,7 @@ namespace Coffee2GoAPI.Controllers
 
         [Route("api/shops/Register")]
         [HttpPost]
-        public HttpResponseMessage Register(Shop shop)
+        public HttpResponseMessage Register()
         {
             #region example     
 
@@ -66,8 +68,16 @@ namespace Coffee2GoAPI.Controllers
             #endregion
             try
             {
-                //BL.Shop shop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(userData);
+                
+                Shop shop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(HttpContext.Current.Request.Params.Get("shop"));
+                               
                 shop.Register(GD);
+                shop.Logo = SaveUploadedFile(GD, shop.Id.ToString());
+                shop.UpdateData(shop);
+
+                
+                shop.SendRegistrationEmail(HttpContext.Current.Request.Url.ToString(), GD);
+
                 return Request.CreateResponse(HttpStatusCode.Created);
             }
             catch (Exception ex)
@@ -126,6 +136,39 @@ namespace Coffee2GoAPI.Controllers
                 return Request.CreateResponse(HttpStatusCode.BadRequest, ex.Message);
             }
         }
+
+        [Route("api/shops/activateaccount")]
+        [HttpGet]
+        public HttpResponseMessage ActivateAccount(string email)
+        {
+            #region example     
+
+            /*
+             http://localhost:61596/api/shops/activateaccount?email=10
+
+            
+             */
+            #endregion
+            try
+            {
+                Shop shop = new Shop();
+                shop.ActivateAccount(GD, email);
+
+                string body = "";
+                var fullPath = System.Web.Hosting.HostingEnvironment.MapPath(@"~/App_Data/ActivationCompleted.html");
+
+                using (StreamReader reader = File.OpenText(fullPath)) 
+                {
+                    body = reader.ReadToEnd();
+                }
+                return Request.CreateResponse(HttpStatusCode.OK, body);
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, ex.Message);
+            }
+        }
+        
 
 
         [Route("api/shops/orderready")]
@@ -283,6 +326,24 @@ namespace Coffee2GoAPI.Controllers
             {
                 return Request.CreateResponse(HttpStatusCode.BadRequest, ex.Message);
             }
+        }
+
+        [HttpPost]
+        public HttpResponseMessage register1()
+        {
+            var exMessage = string.Empty;
+            try
+            {
+
+                SaveUploadedFile(GD,"");
+                Shop shop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(HttpContext.Current.Request.Params.Get("shop"));
+
+            }
+            catch (Exception ex)
+            {
+                exMessage = ex.Message;
+            }
+            return Request.CreateResponse(HttpStatusCode.BadRequest, new { error = true, message = exMessage == string.Empty ? "An unknown error occured" : exMessage });
         }
 
     }

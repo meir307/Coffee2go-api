@@ -6,7 +6,7 @@ namespace BL
 {
     public class OrdersQueryParams
     {
-        public int? ShopId;
+        public long? ShopId;
         public int? UserId;
         public DateTime FromDate;
         public DateTime ToDate;

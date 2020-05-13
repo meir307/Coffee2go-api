@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Common.Tools;
@@ -25,13 +26,18 @@ namespace BL
         public DateTime? SessionTime { get; set; }
         public string Logo { get; set; }
 
+        public string OtherFields { get; set; }
         public bool NowOpen { get; set; }
+
+        public string ConfirmReg { get; set; }
+        
         CRUD dal;
         GlobalData gd;
-        
+       
+       
         public Shop()
         {
-
+            
         }
 
         public Shop(GlobalData gd, string userName, string password)    //login
@@ -91,11 +97,44 @@ namespace BL
             sSql.Append(" Lat='" + newShop.Lat + "',");
             sSql.Append(" Lng='" + newShop.Lng + "',");
             sSql.Append(" MenuObj='" +newShop.MenuObj + "',");
-            sSql.Append(" PhoneNo='" + newShop.PhoneNo + "'");
+            sSql.Append(" PhoneNo='" + newShop.PhoneNo + "',");
+            sSql.Append(" Logo='" + newShop.Logo + "',");
+            sSql.Append(" OtherFields='" + newShop.OtherFields + "'");
             sSql.Append(" where Id=" + this.Id);
 
-            dal = new CRUD(gd.ConnectionString);
+            dal = new CRUD(this.gd.ConnectionString);
             dal.ExecuteNonQuery(sSql.ToString());
+        }
+
+        public void SendRegistrationEmail(string domainName, GlobalData gd)
+        {
+            int l = domainName.IndexOf("api/");
+            domainName = domainName.Substring(0, l);
+
+            MailSender ms = new MailSender(gd.GetParameterValueByKey("smtpServer"), int.Parse(gd.GetParameterValueByKey("smtpPort")), gd.GetParameterValueByKey("smtpEmail"),
+                                            gd.GetParameterValueByKey("smtpPassword"), bool.Parse(gd.GetParameterValueByKey("smtpEnableSsl")));
+            string to = this.Email;
+            string subject = "WazeEat Registration";
+            string body = getRegistrationMailBody(domainName);
+
+            ms.SendEmail(this.Email, "", "", subject, body, true);
+        }
+
+        private string getRegistrationMailBody(string domainName)
+        {
+            string path = AppContext.BaseDirectory + "App_Data\\RegistrationMail.html";
+            path=path.Replace("\\\\","\\");
+
+            string body="";
+            using (StreamReader reader = File.OpenText(path)) 
+            {                                                       
+                body = reader.ReadToEnd();
+            }
+
+            body = body.Replace("{{BuisnessName}}", this.BuisnessName);
+            body = body.Replace("{{domainName}}", domainName);
+            body = body.Replace("{{Email}}", this.Email);
+            return body;
         }
 
         private bool ShopExists(ref string msg)
@@ -112,6 +151,13 @@ namespace BL
                 return true;
             }
             return false;
+        }
+
+        public void ActivateAccount(GlobalData gd, string email)
+        {
+            dal = new CRUD(gd.ConnectionString);
+            string sSql = "update shops set Active = true where Email = '" + email + "'";
+            dal.ExecuteNonQuery(sSql);
         }
 
         public void setOpen(int open)
@@ -183,29 +229,31 @@ namespace BL
         private void getShop(string sessionId, ref DataTable dt)
         {
             StringBuilder sSql = new StringBuilder();
-            sSql.Append("select Id,Email,Password,PhoneNo,Lat, Lng,BuisnessName,NowOpen, MenuObj,HEX(sessionid) sessionId from shops where SessionId=");
+            sSql.Append("select Id,Email,Password,PhoneNo,Lat, Lng,BuisnessName,NowOpen, MenuObj, Logo, OtherFields, HEX(sessionid) sessionId from shops where SessionId=");
             sSql.Append("UNHEX(REPLACE(\"" + sessionId + "\", \"-\",\"\"))");
-            
+            sSql.Append(" and Active=true");
             dal.ExecuteQuery(sSql.ToString(), ref dt);
         }
 
         private void getShop(string userName, string password, ref DataTable dt)
         {
             StringBuilder sSql = new StringBuilder();
-            sSql.Append("select Id,Email,Password,PhoneNo,Lat, Lng,BuisnessName,NowOpen, MenuObj from shops where ");
+            sSql.Append("select Id,Email,Password,PhoneNo,Lat, Lng,BuisnessName,NowOpen, MenuObj , Logo, OtherFields from shops where ");
             sSql.Append(" Email='" + userName + "' and");
-            sSql.Append(" password='" + password + "'");
-            
+            sSql.Append(" password='" + password + "' and");
+            sSql.Append(" Active=true");
             dal.ExecuteQuery(sSql.ToString(), ref dt);
         }
 
         public void Register(GlobalData gd)
         {
+            this.gd = gd;
             long lastInsertedId = 0;
             dal = new CRUD(gd.ConnectionString);
             this.RegistrationDate = DateTime.Now;
             string sSql = sqlShopRegistration();
             dal.ExecuteNonQuery(sSql,ref lastInsertedId);
+            this.Id = (int)lastInsertedId;
         }
 
         private void DataTable2Obj(DataTable dt)
@@ -221,6 +269,8 @@ namespace BL
             this.MenuObj = dt.Rows[0]["MenuObj"].ToString();
             this.Email = dt.Rows[0]["Email"].ToString();
             this.NowOpen = (int)dt.Rows[0]["NowOpen"] != 0;
+            this.Logo = dt.Rows[0]["Logo"].ToString();
+            this.OtherFields = dt.Rows[0]["OtherFields"].ToString();
         }
 
        
@@ -257,10 +307,9 @@ namespace BL
 
             if (ShopExists(ref msg))
                 throw new Exception(msg);
-
-
+            
             StringBuilder sSql = new StringBuilder();
-            sSql.Append("insert into shops (Email,Password,PhoneNo,Lat, Lng,RegistrationDate,BuisnessName,Logo, MenuObj ) values (");
+            sSql.Append("insert into shops (Email,Password,PhoneNo,Lat, Lng,RegistrationDate,BuisnessName,Logo, OtherFields) values (");
 
             //sSql.Append(("UNHEX(REPLACE(\"" + id.ToString() + "\", \"-\",\"\"))"));
                 
@@ -272,7 +321,7 @@ namespace BL
             sSql.Append("'" + RegistrationDate + "',");
             sSql.Append("'" + this.BuisnessName + "',");
             sSql.Append("'" + this.Logo + "',");
-            sSql.Append("'" + this.MenuObj + "')");
+            sSql.Append("'" + this.OtherFields + "')");
 
             return sSql.ToString();
 
@@ -300,11 +349,11 @@ namespace BL
                 msg = "Lng value is missing.";
                 return false;
             }
-            if (string.IsNullOrEmpty(newShop.MenuObj))
-            {
-                msg = "Menu is missing.";
-                return false;
-            }
+            //if (string.IsNullOrEmpty(newShop.MenuObj))
+            //{
+            //    msg = "Menu is missing.";
+            //    return false;
+            //}
             if (string.IsNullOrEmpty(newShop.PhoneNo))
             {
                 msg = "PhoneNo is missing.";

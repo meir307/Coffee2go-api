@@ -121,6 +121,9 @@ namespace BL
             (Id,fullName,Email,userName,password,mobilePhoneNo,regitrationDate) 
             values (UNHEX(REPLACE("72cdaf9c-4761-48ec-a930-4281c2d21a71", "-","")),'meir' ,'meir','meir','qwerty','123123123','2019-01-01 12:00:00')
              */
+
+            //MailSender ms = new MailSender();
+            //ms.SendEmail("mmandeles@gmail.com", "meir", "mmandeles@gmail.com", "", "", "test1", "hello there", false);
         }
 
         private bool UserExists(ref string msg)

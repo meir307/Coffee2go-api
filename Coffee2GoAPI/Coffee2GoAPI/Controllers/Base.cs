@@ -1,6 +1,10 @@
-﻿using System;
+﻿using BL;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Http;
@@ -34,6 +38,37 @@ namespace Coffee2GoAPI.Controllers
             RequestCount = (Int32)MemoryCacher.GetValue("RequestCount");
             RequestCount++;
             MemoryCacher.Set("RequestCount", RequestCount, DateTimeOffset.MaxValue);
+        }
+
+        public string SaveUploadedFile(GlobalData gd, string prefix)
+        {
+            
+            string uploadPath = gd.GetParameterValueByKey("ShopsLogoUploadPath");
+            HttpPostedFile file = null;
+            if (HttpContext.Current.Request.Files.Count == 0)
+                throw new Exception("Image file not found");
+            
+            file = HttpContext.Current.Request.Files[0];
+            
+            // Check if we have a file
+            if (file == null)
+                throw new Exception("Image file not found");
+
+            // Make sure the file has content
+            if (!(file.ContentLength > 0))
+               throw new Exception("Image file not found");
+
+            if (!Directory.Exists(HttpContext.Current.Server.MapPath(uploadPath)))
+            {
+                // If it doesn't exist, create the directory
+                Directory.CreateDirectory(HttpContext.Current.Server.MapPath(uploadPath));
+            }
+
+            //Upload File
+            file.SaveAs(HttpContext.Current.Server.MapPath($"{uploadPath}/{prefix + file.FileName}"));
+
+            return HttpContext.Current.Server.MapPath($"{uploadPath}/{prefix + file.FileName}");
+
         }
     }
     

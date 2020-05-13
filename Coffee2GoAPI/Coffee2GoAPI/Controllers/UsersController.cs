@@ -65,6 +65,8 @@ namespace Coffee2GoAPI.Controllers
             {
                 user.Register(GD);
                 return Request.CreateResponse(HttpStatusCode.Created, "completed successfully");
+
+                
             }
             catch (Exception ex)
             {
