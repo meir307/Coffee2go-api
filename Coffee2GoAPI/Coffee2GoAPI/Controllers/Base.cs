@@ -40,24 +40,30 @@ namespace Coffee2GoAPI.Controllers
             MemoryCacher.Set("RequestCount", RequestCount, DateTimeOffset.MaxValue);
         }
 
-        public string SaveUploadedFile(GlobalData gd, string prefix)
+        public bool UploadFileExists()
         {
-            
-            string uploadPath = gd.GetParameterValueByKey("ShopsLogoUploadPath");
             HttpPostedFile file = null;
             if (HttpContext.Current.Request.Files.Count == 0)
-                throw new Exception("Image file not found");
-            
+                return false;
+
             file = HttpContext.Current.Request.Files[0];
-            
+
             // Check if we have a file
             if (file == null)
-                throw new Exception("Image file not found");
+                return false;
+
 
             // Make sure the file has content
             if (!(file.ContentLength > 0))
-               throw new Exception("Image file not found");
+                return false;
 
+            return true;
+        }
+
+        public string SaveUploadedFile(string uploadPath, string fileName)
+        {
+            HttpPostedFile file = HttpContext.Current.Request.Files[0]; 
+            
             if (!Directory.Exists(HttpContext.Current.Server.MapPath(uploadPath)))
             {
                 // If it doesn't exist, create the directory
@@ -65,10 +71,15 @@ namespace Coffee2GoAPI.Controllers
             }
 
             //Upload File
-            file.SaveAs(HttpContext.Current.Server.MapPath($"{uploadPath}/{prefix + file.FileName}"));
+            string fName = fileName + getExtention(file.FileName);
+            file.SaveAs(HttpContext.Current.Server.MapPath($"{uploadPath}/{fName}"));
+            return fName;
 
-            return HttpContext.Current.Server.MapPath($"{uploadPath}/{prefix + file.FileName}");
-
+        }
+        private string getExtention(string fileName)
+        {
+            int i = fileName.IndexOf(".");
+            return fileName.Substring(i);
         }
     }
     

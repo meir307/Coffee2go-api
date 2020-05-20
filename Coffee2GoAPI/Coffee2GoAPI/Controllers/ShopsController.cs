@@ -1,4 +1,5 @@
 ﻿using BL;
+using BL.RequestObjects;
 using BL.ResponseObjects;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
+using static Common.Tools.CommonFunctions;
 
 namespace Coffee2GoAPI.Controllers
 {
@@ -17,7 +19,7 @@ namespace Coffee2GoAPI.Controllers
 
         [Route("api/shops/updatedata")]
         [HttpPost]
-         public HttpResponseMessage updatedata(Shop newShop)
+         public HttpResponseMessage updatedata()
         {
             #region example     
 
@@ -36,10 +38,16 @@ namespace Coffee2GoAPI.Controllers
             try
             {
                 Shop shop = new Shop(GD, SessionId);
-                //Shop newShop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(data);
+                Shop newShop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(HttpContext.Current.Request.Params.Get("shop"));
+                newShop.Id = shop.Id;
+                newShop.ValidateData(GD, CheckType.Update);
+
+                if (UploadFileExists())
+                    newShop.Logo = SaveUploadedFile(GD.GetParameterValueByKey("ShopsLogoUploadPath"), shop.PhoneNo);
+                
                 shop.UpdateData(newShop);
 
-                return Request.CreateResponse(HttpStatusCode.OK, "completed successfully");
+                return Request.CreateResponse(HttpStatusCode.OK, newShop);
             }
             catch (Exception ex)
             {
@@ -70,14 +78,15 @@ namespace Coffee2GoAPI.Controllers
             {
                 
                 Shop shop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(HttpContext.Current.Request.Params.Get("shop"));
-                               
+                shop.ValidateData(GD, CheckType.Register);
+                if (!UploadFileExists())
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Image file not found");
+                else
+                    shop.Logo = SaveUploadedFile(GD.GetParameterValueByKey("ShopsLogoUploadPath"), shop.PhoneNo);
+
                 shop.Register(GD);
-                shop.Logo = SaveUploadedFile(GD, shop.Id.ToString());
-                shop.UpdateData(shop);
-
-                
+                                
                 shop.SendRegistrationEmail(HttpContext.Current.Request.Url.ToString(), GD);
-
                 return Request.CreateResponse(HttpStatusCode.Created);
             }
             catch (Exception ex)
@@ -328,23 +337,29 @@ namespace Coffee2GoAPI.Controllers
             }
         }
 
+        [Route("api/shops/changepassword")]
         [HttpPost]
-        public HttpResponseMessage register1()
+        public HttpResponseMessage ChangePassword(ChangePasswordParams cpp)
         {
-            var exMessage = string.Empty;
+            #region example     
+
+            /*
+             http://localhost:61596/api/shops/changepassword
+
+            
+             */
+            #endregion
             try
             {
+                Shop shop = new Shop(GD, SessionId);
+                shop.ChangePassword(cpp.OldPassword, cpp.NewPassword);
 
-                SaveUploadedFile(GD,"");
-                Shop shop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(HttpContext.Current.Request.Params.Get("shop"));
-
+                return Request.CreateResponse(HttpStatusCode.OK, shop);
             }
             catch (Exception ex)
             {
-                exMessage = ex.Message;
+                return Request.CreateResponse(HttpStatusCode.BadRequest, ex.Message);
             }
-            return Request.CreateResponse(HttpStatusCode.BadRequest, new { error = true, message = exMessage == string.Empty ? "An unknown error occured" : exMessage });
         }
-
     }
 }

@@ -8,6 +8,11 @@ namespace Common.Tools
 {
     public static class CommonFunctions
     {
+        public enum CheckType
+        { 
+            Register,
+            Update
+        }
         public static DateTime? ConvertToDateTime(object o)
         {
             if (o.ToString() == string.Empty) 

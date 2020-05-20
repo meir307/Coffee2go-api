@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Common.Tools;
 using Dal;
+using static Common.Tools.CommonFunctions;
 
 namespace BL
 {
@@ -33,7 +34,7 @@ namespace BL
         
         CRUD dal;
         GlobalData gd;
-       
+        private string password;
        
         public Shop()
         {
@@ -49,6 +50,10 @@ namespace BL
 
             if (dt.Rows.Count == 0)
                 throw new Exception("Wrong username or password.");
+
+            if ((int)dt.Rows[0]["Active"] == 0)
+                throw new Exception("The account is not activated!");
+
 
             DataTable2Obj(dt);
 
@@ -81,12 +86,12 @@ namespace BL
 
         public void UpdateData(Shop newShop)
         {
-            string msg = "";
-            if (!dataValid(newShop, ref msg))
-                throw new Exception(msg);
+            //string msg = "";
+            //if (!dataValid(newShop, ref msg))
+            //    throw new Exception(msg);
 
-            if (ShopExists(ref msg))
-                throw new Exception(msg);
+            //if (ShopExists(ref msg))
+            //    throw new Exception(msg);
 
 
             StringBuilder sSql = new StringBuilder();
@@ -96,7 +101,7 @@ namespace BL
             sSql.Append(" BuisnessName='" + newShop.BuisnessName + "',");
             sSql.Append(" Lat='" + newShop.Lat + "',");
             sSql.Append(" Lng='" + newShop.Lng + "',");
-            sSql.Append(" MenuObj='" +newShop.MenuObj + "',");
+          //  sSql.Append(" MenuObj='" +newShop.MenuObj + "',");
             sSql.Append(" PhoneNo='" + newShop.PhoneNo + "',");
             sSql.Append(" Logo='" + newShop.Logo + "',");
             sSql.Append(" OtherFields='" + newShop.OtherFields + "'");
@@ -137,12 +142,16 @@ namespace BL
             return body;
         }
 
-        private bool ShopExists(ref string msg)
+        private bool ShopExists(CheckType ct, ref string msg)
         {
             StringBuilder sSql = new StringBuilder();
             string count = "";
 
-            sSql.Append("select count(*) from shops where (Email='" + this.Email + "' or PhoneNo='" + this.PhoneNo + "') and Id <> " + this.Id);
+            sSql.Append("select count(*) from shops where (Email='" + this.Email + "' or PhoneNo='" + this.PhoneNo + "')");
+            if (ct==CheckType.Update)
+                sSql.Append(" and Id <> " + this.Id);
+
+            dal = new CRUD(gd.ConnectionString);
             dal.ExecuteScalar(sSql.ToString(), ref count);
 
             if (int.Parse(count) > 0)
@@ -238,12 +247,16 @@ namespace BL
         private void getShop(string userName, string password, ref DataTable dt)
         {
             StringBuilder sSql = new StringBuilder();
-            sSql.Append("select Id,Email,Password,PhoneNo,Lat, Lng,BuisnessName,NowOpen, MenuObj , Logo, OtherFields from shops where ");
+            sSql.Append("select Id,Email,Password,PhoneNo,Lat, Lng,BuisnessName,NowOpen,Active, MenuObj , Logo, OtherFields from shops where ");
             sSql.Append(" Email='" + userName + "' and");
-            sSql.Append(" password='" + password + "' and");
-            sSql.Append(" Active=true");
+            sSql.Append(" password='" + password + "'");
+            
             dal.ExecuteQuery(sSql.ToString(), ref dt);
         }
+
+        
+
+        
 
         public void Register(GlobalData gd)
         {
@@ -271,6 +284,8 @@ namespace BL
             this.NowOpen = (int)dt.Rows[0]["NowOpen"] != 0;
             this.Logo = dt.Rows[0]["Logo"].ToString();
             this.OtherFields = dt.Rows[0]["OtherFields"].ToString();
+
+            this.password= dt.Rows[0]["Password"].ToString();
         }
 
        
@@ -295,21 +310,35 @@ namespace BL
             dal.ExecuteNonQuery(sSql.ToString());
         }
 
+        public void ChangePassword(string oldPassword, string newPassword)
+        {
+            if (this.password != oldPassword)
+                throw new Exception("Old password is wrong.");
+
+            StringBuilder sSql = new StringBuilder();
+
+            sSql.Append("update shops set Password = '" + newPassword +"'");
+            sSql.Append(" where Id = ");
+            sSql.Append(this.Id);
+
+            dal.ExecuteNonQuery(sSql.ToString());
+        }
+
         private string sqlShopRegistration()
         {
             string json = Newtonsoft.Json.JsonConvert.SerializeObject(this);
 
             string RegistrationDate = this.RegistrationDate.HasValue ? this.RegistrationDate.Value.ToString("yyyy-MM-dd HH:mm") : string.Empty;
 
-            string msg = "";
-            if (!dataValid(this, ref msg))
-                throw new Exception(msg);
+            //string msg = "";
+            //if (!dataValid(this, ref msg))
+            //    throw new Exception(msg);
 
-            if (ShopExists(ref msg))
-                throw new Exception(msg);
+            //if (ShopExists(ref msg))
+            //    throw new Exception(msg);
             
             StringBuilder sSql = new StringBuilder();
-            sSql.Append("insert into shops (Email,Password,PhoneNo,Lat, Lng,RegistrationDate,BuisnessName,Logo, OtherFields) values (");
+            sSql.Append("insert into shops (Email,Password,PhoneNo,Lat, Lng,RegistrationDate,BuisnessName,Logo,Active, OtherFields) values (");
 
             //sSql.Append(("UNHEX(REPLACE(\"" + id.ToString() + "\", \"-\",\"\"))"));
                 
@@ -321,10 +350,30 @@ namespace BL
             sSql.Append("'" + RegistrationDate + "',");
             sSql.Append("'" + this.BuisnessName + "',");
             sSql.Append("'" + this.Logo + "',");
+            sSql.Append("'" + 0 + "',");
             sSql.Append("'" + this.OtherFields + "')");
 
             return sSql.ToString();
 
+        }
+
+        public void ValidateData(GlobalData gd, CheckType ct)
+        {
+            this.gd = gd;
+            Validator.validatePhone(this.PhoneNo);
+            Validator.validateEmail(this.Email);
+
+            if (ct == CheckType.Register)
+                Validator.validatePassword(this.Password);
+
+            Validator.validateLocation(this.Lat, this.Lng);
+
+            if (string.IsNullOrEmpty(this.BuisnessName))
+                throw new Exception("BuisnessName is missing.");
+
+            string msg="";
+            if (ShopExists(ct, ref msg))
+                throw new Exception(msg);
         }
 
         private bool dataValid(Shop newShop, ref string msg)
