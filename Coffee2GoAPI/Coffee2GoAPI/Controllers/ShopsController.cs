@@ -74,10 +74,11 @@ namespace Coffee2GoAPI.Controllers
                     }
              */
             #endregion
+
+            Shop shop = null;
             try
             {
-                
-                Shop shop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(HttpContext.Current.Request.Params.Get("shop"));
+                shop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(HttpContext.Current.Request.Params.Get("shop"));
                 shop.ValidateData(GD, CheckType.Register);
                 if (!UploadFileExists())
                     return Request.CreateResponse(HttpStatusCode.BadRequest, "Image file not found");
@@ -91,6 +92,7 @@ namespace Coffee2GoAPI.Controllers
             }
             catch (Exception ex)
             {
+                shop.Delete();
                 return Request.CreateResponse(HttpStatusCode.BadRequest, ex.Message);
             }
         }

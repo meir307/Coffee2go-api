@@ -111,6 +111,18 @@ namespace BL
             dal.ExecuteNonQuery(sSql.ToString());
         }
 
+        public void Delete()
+        {
+
+            StringBuilder sSql = new StringBuilder();
+            sSql.Append("delete from shops ");
+            
+            sSql.Append(" where Id=" + this.Id);
+
+            dal = new CRUD(this.gd.ConnectionString);
+            dal.ExecuteNonQuery(sSql.ToString());
+        }
+
         public void SendRegistrationEmail(string domainName, GlobalData gd)
         {
             int l = domainName.IndexOf("api/");
