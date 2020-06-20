@@ -13,13 +13,14 @@ namespace BL
 
             //Guid id = Guid.NewGuid();
             StringBuilder sSql = new StringBuilder();
-            sSql.Append("insert into users (FullName,Email,Password,MobilePhoneNo,RegistrationDate) values (");
+            sSql.Append("insert into users (FullName,Email,Password,MobilePhoneNo, ActivationCode,RegistrationDate) values (");
 
             //sSql.Append(("UNHEX(REPLACE(\"" + id.ToString() + "\", \"-\",\"\"))"));
             sSql.Append("'" + user.FullName + "',");
             sSql.Append("'" + user.Email + "',");
             sSql.Append("'" + user.Password + "',");
             sSql.Append("'" + user.MobilePhoneNo + "',");
+            sSql.Append("'" + user.ActivationCode + "',");
             sSql.Append("'" + RegistrationDate + "')");
 
             return sSql.ToString();
@@ -60,7 +61,7 @@ namespace BL
             StringBuilder sSql = new StringBuilder();
             sSql.Append("select Id,Fullname,Email,Password,MobilePhoneNo,LastLoginAt, RegistrationDate ,HEX(sessionid) sessionId");
             sSql.Append(" from users where Email='" + userName + "' and Password='" + password + "'");
-
+            sSql.Append(" where Active=1 ");
             return sSql.ToString();
         }
 

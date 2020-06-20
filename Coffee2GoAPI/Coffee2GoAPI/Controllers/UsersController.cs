@@ -64,7 +64,7 @@ namespace Coffee2GoAPI.Controllers
             try
             {
                 user.Register(GD);
-                return Request.CreateResponse(HttpStatusCode.Created, "completed successfully");
+                return Request.CreateResponse(HttpStatusCode.Created, "Step 1 completed successfully");
 
                 
             }
@@ -73,6 +73,32 @@ namespace Coffee2GoAPI.Controllers
                 return Request.CreateResponse(HttpStatusCode.BadRequest, ex.Message);
             }
         }
+
+        [Route("api/users/activateaccount")]
+        [HttpGet]
+        public HttpResponseMessage ActivateAccount(string phoneNum, string activationCode)
+        {
+            #region example     
+
+            /*
+            http://localhost:61596/api/users/activateaccount?phoneNum=123123123&activationCode=246876
+            
+             */
+            #endregion
+
+            try
+            {
+                User user = new User(GD);
+                user.ActivateAccount(phoneNum, activationCode);
+
+                return Request.CreateResponse(HttpStatusCode.OK, "completed successfully");
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, ex.Message);
+            }
+        }
+
 
 
         [Route("api/users/login")]

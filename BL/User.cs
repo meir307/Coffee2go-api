@@ -18,6 +18,7 @@ namespace BL
         public string Password { get; set; }
         public string MobilePhoneNo { get; set; }
         public DateTime? RegistrationDate { get; set; }
+        public string ActivationCode { get; private set; }
         public DateTime? LastLoginAt { get; set; }
         public string SessionId { get; set; }
         public DateTime SessionTime { get; set; }
@@ -27,6 +28,11 @@ namespace BL
         public User()
         { 
         
+        }
+
+        public User(GlobalData gd)
+        {
+            this.gd = gd;
         }
 
         public User(GlobalData gd, string userName, string password)    //login
@@ -101,6 +107,8 @@ namespace BL
             return true;
         }
 
+        
+
         public void Register(GlobalData gd)
         {
             string msg = "";
@@ -113,9 +121,15 @@ namespace BL
                 throw new Exception(msg);
 
             this.RegistrationDate = DateTime.Now;
+            this.ActivationCode = Common.Tools.CommonFunctions.getRandomString(6);
+
+            string smsMsg = "שלום " + this.FullName + ". קוד ההרשמה שלך הוא " + this.ActivationCode;
+
             string sSql = UserSqlProc.UserRegistration(this);
             dal.ExecuteNonQuery(sSql);
-
+            
+            SMSSender sms = new SMSSender();
+            sms.SendSMS("", this.MobilePhoneNo, smsMsg);
             /*
              insert into coffee2go2.users 
             (Id,fullName,Email,userName,password,mobilePhoneNo,regitrationDate) 
@@ -124,6 +138,33 @@ namespace BL
 
             //MailSender ms = new MailSender();
             //ms.SendEmail("mmandeles@gmail.com", "meir", "mmandeles@gmail.com", "", "", "test1", "hello there", false);
+        }
+
+        public void ActivateAccount(string phoneNum, string activationCode)
+        {
+            CRUD dal = new CRUD(gd.ConnectionString);
+            DataTable dt = new DataTable();
+            StringBuilder sSql = new StringBuilder();
+
+            sSql.Append("select * from users where ");
+            sSql.Append("MobilePhoneNo = '" + phoneNum + "'");
+            sSql.Append(" and ActivationCode = '" + activationCode + "'");
+            sSql.Append(" and Active = 0");
+
+            dal.ExecuteQuery(sSql.ToString(), ref dt);
+
+            if (dt.Rows.Count == 0)
+                throw new Exception("Wrong activation code");
+
+            if (dt.Rows.Count == 1)
+            {
+                sSql = new StringBuilder();
+                sSql.Append("update users set Active =1 where ");
+                sSql.Append(" Id = " + dt.Rows[0]["Id"]);
+                
+                dal.ExecuteNonQuery(sSql.ToString());
+            }
+            
         }
 
         private bool UserExists(ref string msg)

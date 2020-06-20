@@ -1,6 +1,6 @@
 using System;
 
-namespace Coffee2GoAPI2
+namespace WaysEat
 {
     public class WeatherForecast
     {

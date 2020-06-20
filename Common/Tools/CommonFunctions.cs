@@ -9,13 +9,13 @@ namespace Common.Tools
     public static class CommonFunctions
     {
         public enum CheckType
-        { 
+        {
             Register,
             Update
         }
         public static DateTime? ConvertToDateTime(object o)
         {
-            if (o.ToString() == string.Empty) 
+            if (o.ToString() == string.Empty)
                 return null;
             return DateTime.Parse(o.ToString());
         }
@@ -38,6 +38,21 @@ namespace Common.Tools
             return false;
         }
 
-     
+        public static string getRandomString(int len)
+        {
+            string _numbers = "0123456789";
+            Random random = new Random();
+            string ret = "";
+                       
+            for (int i = 0; i< len; i++)
+            {
+                ret += (_numbers[random.Next(0, _numbers.Length)]);
+            }
+
+            return ret;
+        }
+
+        
+
     }
 }

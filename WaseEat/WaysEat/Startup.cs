@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Coffee2GoAPI2
+namespace WaysEat
 {
     public class Startup
     {
@@ -26,15 +26,6 @@ namespace Coffee2GoAPI2
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddMemoryCache();
-            services.AddCors(options =>
-            {
-                options.AddPolicy("CorsPolicy",
-                    builder => builder.WithOrigins("http://localhost:8080")
-                    .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials());
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -50,7 +41,6 @@ namespace Coffee2GoAPI2
             app.UseRouting();
 
             app.UseAuthorization();
-            app.UseCors();
 
             app.UseEndpoints(endpoints =>
             {
