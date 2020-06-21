@@ -5,8 +5,6 @@ namespace DeleteInactiveUsers
 {
     public class Program
     {
-        private readonly IConfiguration _config;
-                
         static void Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
@@ -14,7 +12,7 @@ namespace DeleteInactiveUsers
                 .Build();
             
             BL.GlobalData gd = new BL.GlobalData(configuration.GetConnectionString("ConnectionString"));
-
+            
             InactiveUsers iu = new InactiveUsers(gd);
             iu.DeleteInactiveUsers();
             
