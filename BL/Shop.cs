@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using Common.Tools;
 using Dal;
 using static Common.Tools.CommonFunctions;
@@ -12,6 +13,7 @@ namespace BL
 {
     public class Shop
     {
+        private string _PhoneNo;
         public int Id { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
@@ -20,7 +22,18 @@ namespace BL
         public DateTime? RegistrationDate { get; set; }
         public string MenuObj { get; set; }
         public string BuisnessName { get; set; }
-        public string PhoneNo { get; set; }
+        public string PhoneNo
+        {
+            get
+            {
+                return _PhoneNo;
+            }
+            set
+            {
+                _PhoneNo = Regex.Replace(value, @"[^\d]", "");
+            }
+        }
+
         //public bool? isValid { get; set; }
         public DateTime? LastLoginAt { get; set; }
         public string SessionId { get; set; }

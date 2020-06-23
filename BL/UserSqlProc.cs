@@ -13,13 +13,14 @@ namespace BL
 
             //Guid id = Guid.NewGuid();
             StringBuilder sSql = new StringBuilder();
-            sSql.Append("insert into users (FullName,Email,Password,MobilePhoneNo, ActivationCode,RegistrationDate) values (");
+            sSql.Append("insert into users (FullName,Email,Password,MobilePhoneNo,Active, ActivationCode,RegistrationDate) values (");
 
             //sSql.Append(("UNHEX(REPLACE(\"" + id.ToString() + "\", \"-\",\"\"))"));
             sSql.Append("'" + user.FullName + "',");
             sSql.Append("'" + user.Email + "',");
             sSql.Append("'" + user.Password + "',");
             sSql.Append("'" + user.MobilePhoneNo + "',");
+            sSql.Append(" 0,");
             sSql.Append("'" + user.ActivationCode + "',");
             sSql.Append("'" + RegistrationDate + "')");
 

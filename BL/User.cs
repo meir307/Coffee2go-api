@@ -4,19 +4,31 @@ using Dal;
 using System;
 using System.Data;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BL
 {
     public class User 
     {
 
+        private string _MobilePhoneNo;
         public int Id { get; set; }
         public string FullName { get; set; }
 
         public string Email { get; set; }
         //public string UserName { get; set; }
         public string Password { get; set; }
-        public string MobilePhoneNo { get; set; }
+        public string MobilePhoneNo
+        {
+            get
+            {
+                return _MobilePhoneNo;
+            }
+            set
+            {
+                _MobilePhoneNo = Regex.Replace(value, @"[^\d]", "");
+            }
+        }
         public DateTime? RegistrationDate { get; set; }
         public string ActivationCode { get; private set; }
         public DateTime? LastLoginAt { get; set; }
@@ -127,14 +139,12 @@ namespace BL
 
             string sSql = UserSqlProc.UserRegistration(this);
             dal.ExecuteNonQuery(sSql);
+
             
-            SMSSender sms = new SMSSender();
-            sms.SendSMS("", this.MobilePhoneNo, smsMsg);
-            /*
-             insert into coffee2go2.users 
-            (Id,fullName,Email,userName,password,mobilePhoneNo,regitrationDate) 
-            values (UNHEX(REPLACE("72cdaf9c-4761-48ec-a930-4281c2d21a71", "-","")),'meir' ,'meir','meir','qwerty','123123123','2019-01-01 12:00:00')
-             */
+
+            SMSSender.SMSSender sms = new SMSSender.SMSSender(gd.GetParameterValueByKey("GlobalSMS_ApiKey"));
+            sms.SendSMSAsync(gd.GetParameterValueByKey("GlobalSMS_FromPhone"), this.MobilePhoneNo, smsMsg);
+            
 
             //MailSender ms = new MailSender();
             //ms.SendEmail("mmandeles@gmail.com", "meir", "mmandeles@gmail.com", "", "", "test1", "hello there", false);
@@ -146,6 +156,8 @@ namespace BL
             DataTable dt = new DataTable();
             StringBuilder sSql = new StringBuilder();
 
+            phoneNum = Regex.Replace(phoneNum, @"[^\d]", "");
+
             sSql.Append("select * from users where ");
             sSql.Append("MobilePhoneNo = '" + phoneNum + "'");
             sSql.Append(" and ActivationCode = '" + activationCode + "'");
@@ -154,17 +166,24 @@ namespace BL
             dal.ExecuteQuery(sSql.ToString(), ref dt);
 
             if (dt.Rows.Count == 0)
-                throw new Exception("Wrong activation code");
+            {
+                throw new Exception("Wrong activation code"); throw new Exception("Wrong activation code");
+            }
 
             if (dt.Rows.Count == 1)
             {
                 sSql = new StringBuilder();
-                sSql.Append("update users set Active =1 where ");
+                sSql.Append("update users set Active =1,ActivationCode=null where ");
                 sSql.Append(" Id = " + dt.Rows[0]["Id"]);
                 
                 dal.ExecuteNonQuery(sSql.ToString());
             }
-            
+
+            if (dt.Rows.Count > 1)
+            {
+                throw new Exception(dt.Rows.Count + " rows with the same activation code in the DB ---   ");
+            }
+
         }
 
         private bool UserExists(ref string msg)
