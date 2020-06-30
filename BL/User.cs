@@ -133,7 +133,7 @@ namespace BL
                 throw new Exception(msg);
 
             this.RegistrationDate = DateTime.Now;
-            this.ActivationCode = Common.Tools.CommonFunctions.getRandomString(6);
+            this.ActivationCode = Common.Tools.CommonFunctions.getRandomString(4);
 
             string smsMsg = "שלום " + this.FullName + ". קוד ההרשמה שלך הוא " + this.ActivationCode;
 

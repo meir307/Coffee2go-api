@@ -62,7 +62,7 @@ namespace BL
             StringBuilder sSql = new StringBuilder();
             sSql.Append("select Id,Fullname,Email,Password,MobilePhoneNo,LastLoginAt, RegistrationDate ,HEX(sessionid) sessionId");
             sSql.Append(" from users where Email='" + userName + "' and Password='" + password + "'");
-            sSql.Append(" where Active=1 ");
+            sSql.Append(" and Active=1 ");
             return sSql.ToString();
         }
 
