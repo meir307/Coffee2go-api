@@ -176,8 +176,8 @@ namespace Coffee2GoAPI.Controllers
                 User user = new User(GD, SessionId);
                 Order order = new Order(GD, orderId);
                 order.UserUpdateArrivalTime(EstimatedArrivalAt, user.Id);
-
-                return Request.CreateResponse(HttpStatusCode.OK, "completed successfully");
+                List<OrdersResponse> orders = order.GetOrder(user.Id, orderId);
+                return Request.CreateResponse(HttpStatusCode.OK, orders);
             }
             catch (Exception ex)
             {

@@ -151,6 +151,13 @@ namespace BL
             return getOrders(oqp);
         }
 
+        public List<OrdersResponse> GetOrder(int userId, long orderId)
+        {
+            OrdersQueryParams oqp = new OrdersQueryParams();
+            oqp.OrderId = orderId;
+            oqp.UserId = userId;
+            return getOrders(oqp);
+        }
 
         public List<OrdersResponse> GetOrders(OrdersQueryParams oqp, User user)
         {
@@ -164,11 +171,10 @@ namespace BL
         private List<OrdersResponse> getOrders(OrdersQueryParams oqp)
         {
             oqp.Validate();
-
             string name = "";
             string whereClause = "";
             string fromClause = "";
-            if (oqp.UserId != null)
+            if (oqp.UserId.HasValue)
             {
                 name = "BuisnessName, null fullname, null MobilePhoneNo, null Email";
                 fromClause = " from orders,Shops ";
@@ -181,36 +187,42 @@ namespace BL
                 whereClause = "where shopid = " + oqp.ShopId + " and orders.userid=users.id";
             }
 
+            if (oqp.OrderId.HasValue)
+                whereClause = whereClause + " and orders.Id = " + oqp.OrderId;
+            
             StringBuilder sSql = new StringBuilder();
 
             sSql.Append("select orders.Id OrderId," + name + ", CreatedAt, EstimatedArrivalAt, ShopApproveAt, OrderReadyAt, ShopRejectedAt, OrderdeliveredAt, RejectedMsg, OrderObj ");
             sSql.Append(fromClause);
             sSql.Append(whereClause);
 
-            if (oqp.IsDelivered.HasValue && oqp.IsDelivered==false)
-                sSql.Append(" and OrderDeliveredAt is null");
+            if (!oqp.OrderId.HasValue)
+            {
+                if (oqp.IsDelivered.HasValue && oqp.IsDelivered == false)
+                    sSql.Append(" and OrderDeliveredAt is null");
 
-            if (oqp.IsDelivered.HasValue && oqp.IsDelivered == true)
-                sSql.Append(" and OrderDeliveredAt is not null");
+                if (oqp.IsDelivered.HasValue && oqp.IsDelivered == true)
+                    sSql.Append(" and OrderDeliveredAt is not null");
 
-            if (oqp.IsReady.HasValue && oqp.IsReady == false)
-                sSql.Append(" and OrderReadyAt is null");
+                if (oqp.IsReady.HasValue && oqp.IsReady == false)
+                    sSql.Append(" and OrderReadyAt is null");
 
-            if (oqp.IsReady.HasValue && oqp.IsReady == true)
-                sSql.Append(" and OrderReadyAt is not null");
+                if (oqp.IsReady.HasValue && oqp.IsReady == true)
+                    sSql.Append(" and OrderReadyAt is not null");
 
-            if (oqp.IsRejected.HasValue && oqp.IsRejected == false)
-                sSql.Append(" and ShopRejectedAt is null");
+                if (oqp.IsRejected.HasValue && oqp.IsRejected == false)
+                    sSql.Append(" and ShopRejectedAt is null");
 
-            if (oqp.IsRejected.HasValue && oqp.IsRejected == true)
-                sSql.Append(" and ShopRejectedAt is not null");
+                if (oqp.IsRejected.HasValue && oqp.IsRejected == true)
+                    sSql.Append(" and ShopRejectedAt is not null");
 
 
-            sSql.Append(" and CreatedAt >= '" + oqp.FromDate.ToString("yyyy-MM-dd HH:mm") + "'");
-            sSql.Append(" and CreatedAt <= '" + oqp.ToDate.ToString("yyyy-MM-dd HH:mm") + "'");
+                sSql.Append(" and CreatedAt >= '" + oqp.FromDate.ToString("yyyy-MM-dd HH:mm") + "'");
+                sSql.Append(" and CreatedAt <= '" + oqp.ToDate.ToString("yyyy-MM-dd HH:mm") + "'");
 
-            //sSql.Append(" and CreatedAt > '" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd hh:mm") + "'");
-            sSql.Append(" order by EstimatedArrivalAt");
+                //sSql.Append(" and CreatedAt > '" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd hh:mm") + "'");
+                sSql.Append(" order by EstimatedArrivalAt");
+            }
 
             dal = new CRUD(gd.ConnectionString);
             DataTable dt = new DataTable();

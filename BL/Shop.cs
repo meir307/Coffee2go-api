@@ -196,7 +196,8 @@ namespace BL
 
         public void setOpen(int open)
         {
-            if (open != 1 && open != 0) throw new Exception("illegal value for open parameter (can be 1 or 0)");
+            if (open != 1 && open != 0) 
+                throw new MyException("illegal value for open parameter (can be 1 or 0)");
 
             dal = new CRUD(gd.ConnectionString);
             string sSql = "update shops set NowOpen = " + open + " where Id = " + this.Id;

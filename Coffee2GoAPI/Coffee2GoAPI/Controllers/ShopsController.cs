@@ -111,7 +111,9 @@ namespace Coffee2GoAPI.Controllers
             {
                 //loginParams lp = Newtonsoft.Json.JsonConvert.DeserializeObject<loginParams>(userData);
                 Shop shop = new Shop(GD, userName, lp.password);
-                
+
+                //shop.Logo = HttpContext.Current.Server.MapPath($"{GD.GetParameterValueByKey("ShopsLogoUploadPath")}/{shop.Logo}");
+
                 return Request.CreateResponse(HttpStatusCode.OK, shop);
 
             }
@@ -227,7 +229,7 @@ namespace Coffee2GoAPI.Controllers
                 shop.setOpen(open);
                 return Request.CreateResponse(HttpStatusCode.OK, "completed successfully");
             }
-            catch (Exception ex)
+            catch (MyException ex)
             {
                 return Request.CreateResponse(HttpStatusCode.BadRequest, ex.Message);
             }
@@ -315,7 +317,7 @@ namespace Coffee2GoAPI.Controllers
 
         [Route("api/shops/getorders")]
         [HttpPost]
-        public HttpResponseMessage GetOrder(OrdersQueryParams oqp)
+        public HttpResponseMessage GetOrders(OrdersQueryParams oqp)
         {
             #region example     
 
