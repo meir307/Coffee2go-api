@@ -139,13 +139,10 @@ namespace BL
 
             string sSql = UserSqlProc.UserRegistration(this);
             dal.ExecuteNonQuery(sSql);
-
             
-
             SMSSender.SMSSender sms = new SMSSender.SMSSender(gd.GetParameterValueByKey("GlobalSMS_ApiKey"));
             sms.SendSMSAsync(gd.GetParameterValueByKey("GlobalSMS_FromPhone"), this.MobilePhoneNo, smsMsg);
             
-
             //MailSender ms = new MailSender();
             //ms.SendEmail("mmandeles@gmail.com", "meir", "mmandeles@gmail.com", "", "", "test1", "hello there", false);
         }
@@ -166,9 +163,7 @@ namespace BL
             dal.ExecuteQuery(sSql.ToString(), ref dt);
 
             if (dt.Rows.Count == 0)
-            {
-                throw new Exception("Wrong activation code"); throw new Exception("Wrong activation code");
-            }
+                throw new Exception("Wrong activation code");
 
             if (dt.Rows.Count == 1)
             {
@@ -180,9 +175,7 @@ namespace BL
             }
 
             if (dt.Rows.Count > 1)
-            {
                 throw new Exception(dt.Rows.Count + " rows with the same activation code in the DB ---   ");
-            }
 
         }
 
