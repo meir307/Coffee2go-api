@@ -9,10 +9,14 @@ using System.Net;
 using System.Net.Http;
 using System.Web;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using static Common.Tools.CommonFunctions;
+
+//https://docs.google.com/document/d/12-hlJBQSvJ3oFNSVOo7f8kNdfWC5P80JbPOfh3ipwQg/edit#heading=h.o736nkgd1ncp
 
 namespace Coffee2GoAPI.Controllers
 {
+    //[EnableCors(origins: "*", headers: "*", methods: "*")]
     public class ShopsController : Base
     {
         public ShopsController() { }
@@ -81,7 +85,9 @@ namespace Coffee2GoAPI.Controllers
                 shop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(HttpContext.Current.Request.Params.Get("shop"));
                 shop.ValidateData(GD, CheckType.Register);
                 if (!UploadFileExists())
-                    return Request.CreateResponse(HttpStatusCode.BadRequest, "Image file not found");
+                {
+                    //return Request.CreateResponse(HttpStatusCode.BadRequest, "Image file not found");
+                }
                 else
                     shop.Logo = SaveUploadedFile(GD.GetParameterValueByKey("ShopsLogoUploadPath"), shop.PhoneNo);
 

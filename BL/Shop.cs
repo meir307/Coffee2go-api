@@ -352,7 +352,7 @@ namespace BL
 
         private string sqlShopRegistration()
         {
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(this);
+           // string json = Newtonsoft.Json.JsonConvert.SerializeObject(this);
 
             string RegistrationDate = this.RegistrationDate.HasValue ? this.RegistrationDate.Value.ToString("yyyy-MM-dd HH:mm") : string.Empty;
 

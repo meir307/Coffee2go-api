@@ -19,12 +19,12 @@ namespace Coffee2GoAPI
             config.MapHttpAttributeRoutes();
 
 
-            var cors = new EnableCorsAttribute(
-            origins: "*",
-            headers: "*",
-            methods: "*");
+            //var cors = new EnableCorsAttribute(
+            //origins: "*",
+            //headers: "*",
+            //methods: "*");
 
-            //EnableCorsAttribute cors = new EnableCorsAttribute("*", "*", "GET,POST");
+            EnableCorsAttribute cors = new EnableCorsAttribute("*", "*", "GET,POST");
             config.EnableCors(cors);
 
             config.Routes.MapHttpRoute(
