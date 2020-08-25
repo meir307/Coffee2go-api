@@ -135,7 +135,11 @@ namespace BL
             this.RegistrationDate = DateTime.Now;
             this.ActivationCode = Common.Tools.CommonFunctions.getRandomString(4);
 
-            string smsMsg = "שלום " + this.FullName + ". קוד ההרשמה שלך הוא " + this.ActivationCode;
+            //string smsMsg = "שלום " + this.FullName + ". קוד ההרשמה שלך הוא " + this.ActivationCode;
+            string smsMsg = gd.GetParameterValueByKey("GlobalSMS_UserRegistrationMsg");
+            smsMsg = smsMsg.Replace("{{activationCode}}", this.ActivationCode);
+            smsMsg = smsMsg.Replace("{{userName}}", this.FullName);
+
 
             string sSql = UserSqlProc.UserRegistration(this);
             dal.ExecuteNonQuery(sSql);

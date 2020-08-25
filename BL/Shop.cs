@@ -114,7 +114,7 @@ namespace BL
             sSql.Append(" BuisnessName='" + newShop.BuisnessName + "',");
             sSql.Append(" Lat='" + newShop.Lat + "',");
             sSql.Append(" Lng='" + newShop.Lng + "',");
-          //  sSql.Append(" MenuObj='" +newShop.MenuObj + "',");
+            sSql.Append(" MenuObj='" +newShop.MenuObj + "',");
             sSql.Append(" PhoneNo='" + newShop.PhoneNo + "',");
             sSql.Append(" Logo='" + newShop.Logo + "',");
             sSql.Append(" OtherFields='" + newShop.OtherFields + "'");

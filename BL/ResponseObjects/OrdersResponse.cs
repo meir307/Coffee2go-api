@@ -9,6 +9,7 @@ namespace BL.ResponseObjects
     
     public class OrdersResponse
     {
+        public long ShopId { get; set; }
         public long OrderId { get; set; }
         public string UserName { get; set; }
 
@@ -26,8 +27,10 @@ namespace BL.ResponseObjects
         public DateTime? ShopRejectedAt { get; set; }
         public string RejectedMsg { get; set; }
        
-        public DateTime? OrderdeliveredAt { get; set; } 
+        public DateTime? OrderdeliveredAt { get; set; }
 
+        public string Lat { get; set; }
+        public string Lng { get; set; }
 
     }
 }

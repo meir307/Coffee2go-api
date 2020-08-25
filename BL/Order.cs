@@ -176,7 +176,7 @@ namespace BL
             string fromClause = "";
             if (oqp.UserId.HasValue)
             {
-                name = "BuisnessName, null fullname, null MobilePhoneNo, null Email";
+                name = "shops.Id as ShopId, BuisnessName, null fullname, null MobilePhoneNo, null Email, Lat,Lng";
                 fromClause = " from orders,Shops ";
                 whereClause = " where  Userid = " + oqp.UserId + " and orders.shopid=shops.id";
             }
@@ -221,7 +221,7 @@ namespace BL
                 sSql.Append(" and CreatedAt <= '" + oqp.ToDate.ToString("yyyy-MM-dd HH:mm") + "'");
 
                 //sSql.Append(" and CreatedAt > '" + DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd hh:mm") + "'");
-                sSql.Append(" order by EstimatedArrivalAt");
+                sSql.Append(" order by EstimatedArrivalAt desc");
             }
 
             dal = new CRUD(gd.ConnectionString);
@@ -255,6 +255,16 @@ namespace BL
                 
                 sro.RejectedMsg = dr["RejectedMsg"].ToString();
                 sro.OrderObj = dr["OrderObj"].ToString();
+
+                if (dr.Table.Columns.Contains("Lat"))
+                    sro.Lat = dr["Lat"].ToString();
+
+                if (dr.Table.Columns.Contains("Lng"))
+                    sro.Lng = dr["Lng"].ToString();
+
+                if (dr.Table.Columns.Contains("ShopId"))
+                    sro.ShopId = long.Parse(dr["ShopId"].ToString());
+
 
                 ol.Add(sro);
             }
