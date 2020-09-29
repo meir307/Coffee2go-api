@@ -45,11 +45,15 @@ namespace Coffee2GoAPI.Controllers
                 Shop newShop = Newtonsoft.Json.JsonConvert.DeserializeObject<Shop>(HttpContext.Current.Request.Params.Get("shop"));
                 newShop.Id = shop.Id;
                 newShop.ValidateData(GD, CheckType.Update);
-
-                if (UploadFileExists())
+                
+                bool fileExist = UploadFileExists();
+                if (fileExist)
                     newShop.Logo = SaveUploadedFile(GD.GetParameterValueByKey("ShopsLogoUploadPath"), shop.PhoneNo);
                 
                 shop.UpdateData(newShop);
+
+                if (fileExist)
+                    newShop.Logo = GD.GetParameterValueByKey("ShopsLogoUploadPath") + "/" + newShop.Logo;
 
                 return Request.CreateResponse(HttpStatusCode.OK, newShop);
             }
@@ -335,7 +339,7 @@ namespace Coffee2GoAPI.Controllers
             #endregion
             try
             {
-                Shop shop = new Shop(GD, SessionId);
+                 Shop shop = new Shop(GD, SessionId);
                 Order order = new Order(GD);
                 //List<OrdersResponse> orders = order.GetOrders(shop);
                 List<OrdersResponse> orders = order.GetOrders(oqp, shop);

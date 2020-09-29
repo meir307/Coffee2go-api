@@ -48,7 +48,7 @@ namespace BL
         CRUD dal;
         GlobalData gd;
         private string password;
-       
+              
         public Shop()
         {
             
@@ -56,6 +56,7 @@ namespace BL
 
         public Shop(GlobalData gd, string userName, string password)    //login
         {
+            this.gd = gd;
             dal = new CRUD(gd.ConnectionString);
             
             DataTable dt = new DataTable();
@@ -308,7 +309,7 @@ namespace BL
             this.MenuObj = dt.Rows[0]["MenuObj"].ToString();
             this.Email = dt.Rows[0]["Email"].ToString();
             this.NowOpen = (int)dt.Rows[0]["NowOpen"] != 0;
-            this.Logo = dt.Rows[0]["Logo"].ToString();
+            this.Logo = (this.gd.GetParameterValueByKey("ShopsLogoUploadPath")) + "/" +  dt.Rows[0]["Logo"].ToString();  //.Substring(1)
             this.OtherFields = dt.Rows[0]["OtherFields"].ToString();
 
             this.password= dt.Rows[0]["Password"].ToString();
