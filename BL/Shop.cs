@@ -228,6 +228,7 @@ namespace BL
             foreach (DataRow dr in dt.Rows)
             {
                 shop = convertToShop(dr);
+                shop.Logo = GD.GetParameterValueByKey("ShopsLogoUploadPath") + "/" + shop.Logo;
                 Shops.Add(shop);
             }
             return Shops;
