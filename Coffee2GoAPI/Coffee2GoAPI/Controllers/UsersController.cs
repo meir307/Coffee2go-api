@@ -202,7 +202,7 @@ namespace Coffee2GoAPI.Controllers
 
             try
             {
-                User user = new User(GD, SessionId);
+               // User user = new User(GD, SessionId);
                 List<Shop> shops = Shop.GetShops(GD, lat, lng, range);
                 return Request.CreateResponse(HttpStatusCode.OK, shops);
             }

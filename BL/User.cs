@@ -101,11 +101,11 @@ namespace BL
 
         private bool dataValid(User newUser, ref string msg)
         {
-            if (string.IsNullOrEmpty(newUser.Email))
-            {
-                msg = "Email is missing.";
-                return false;
-            }
+            //if (string.IsNullOrEmpty(newUser.Email))
+            //{
+            //    msg = "Email is missing.";
+            //    return false;
+            //}
             if (string.IsNullOrEmpty(newUser.FullName))
             {
                 msg = "FullName is missing.";
