@@ -148,7 +148,7 @@ namespace Coffee2GoAPI.Controllers
             {
                 User user = new User(GD, SessionId);
 
-                Log l = new Log(GD, "api/users/addorder", user.Id, JsonConvert.SerializeObject(order), "info");
+               // Log l = new Log(GD, "api/users/addorder", user.Id, JsonConvert.SerializeObject(order), "info");
                 //Order order = Newtonsoft.Json.JsonConvert.DeserializeObject<Order>(orderData);
                 order.AddNew(GD, user);
 
